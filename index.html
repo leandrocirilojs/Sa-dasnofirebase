@@ -232,44 +232,7 @@
 
 
 
-<!-- Adicione isso antes do </body> no index.html -->
 
-<!-- Botão Flutuante WhatsApp -->
-<button id="btn-wpp-flutuante" title="WhatsApp">
-  <i class="fab fa-whatsapp"></i>
-</button>
-
-<script>
-  const btnWpp = document.getElementById('btn-wpp-flutuante');
-  const painelWpp = document.querySelector('.whatsapp-scheduler-container');
-
-  // Move o painel para fora do nav, direto no body
-  if (painelWpp) document.body.appendChild(painelWpp);
-
-  btnWpp.addEventListener('click', () => {
-    const aberto = painelWpp.classList.toggle('aberto');
-    btnWpp.innerHTML = aberto
-      ? '<i class="fas fa-times"></i>'
-      : '<i class="fab fa-whatsapp"></i>';
-
-    // Fecha o menu hambúrguer se estiver aberto
-    const nav = document.getElementById('nav-links');
-    if (nav) nav.classList.remove('active');
-  });
-
-  // Fecha ao clicar fora
-  document.addEventListener('click', (e) => {
-    if (
-      painelWpp.classList.contains('aberto') &&
-      !painelWpp.contains(e.target) &&
-      e.target !== btnWpp &&
-      !btnWpp.contains(e.target)
-    ) {
-      painelWpp.classList.remove('aberto');
-      btnWpp.innerHTML = '<i class="fab fa-whatsapp"></i>';
-    }
-  });
-</script>
     
 
     
