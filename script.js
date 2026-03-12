@@ -471,4 +471,4 @@ function enviarWhatsApp() {
 
   const phoneNumber = "5513981335733";
   window.open(`https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`, '_blank');
-}
+                            }
