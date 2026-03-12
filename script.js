@@ -136,23 +136,39 @@ onAuthStateChanged(auth, (usuario) => {
 
 // === BOTÃO LOGOUT NO HEADER ===
 function adicionarBotaoLogout(email) {
-  const logo = document.querySelector('.logo');
-  if (!logo || document.getElementById('btn-logout')) return;
+  // Remove botão anterior se existir
+  const anterior = document.getElementById('btn-logout');
+  if (anterior) anterior.remove();
 
-  const btn = document.createElement('button');
-  btn.id = 'btn-logout';
-  btn.innerHTML = `<i class="fa-solid fa-right-from-bracket"></i>`;
-  btn.title = `Sair (${email})`;
-  btn.style.cssText = `
-    background: rgba(108,31,58,0.8);
-    border: none; color: white; padding: 6px 12px;
-    border-radius: 6px; cursor: pointer; font-size: 14px;
-    margin-left: 10px;
-  `;
-  btn.addEventListener('click', () => {
-    if (confirm('Deseja sair?')) signOut(auth);
-  });
-  logo.appendChild(btn);
+  const inserir = () => {
+    const header = document.querySelector('.header');
+    if (!header) return;
+
+    const btn = document.createElement('button');
+    btn.id = 'btn-logout';
+    btn.innerHTML = `<i class="fa-solid fa-right-from-bracket"></i> Sair`;
+    btn.title = `Sair (${email})`;
+    btn.style.cssText = `
+      background: rgba(108,31,58,0.9) !important;
+      border: 1px solid rgba(220,53,69,0.4) !important;
+      color: white !important; padding: 7px 14px !important;
+      border-radius: 8px !important; cursor: pointer !important;
+      font-size: 13px !important; font-weight: bold !important;
+      margin-left: auto !important; margin-right: 60px !important;
+      z-index: 1001 !important; position: relative !important;
+      display: flex !important; align-items: center !important; gap: 6px !important;
+    `;
+    btn.addEventListener('click', () => {
+      if (confirm('Deseja sair?')) signOut(auth);
+    });
+    header.appendChild(btn);
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', inserir);
+  } else {
+    inserir();
+  }
 }
 
 // === APP PRINCIPAL ===
