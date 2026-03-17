@@ -80,8 +80,9 @@ body::before {
 .header {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   padding: 0 20px;
-  height: 60px;
+  height: 64px;
   background: rgba(5, 3, 15, 0.96);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
@@ -92,6 +93,7 @@ body::before {
   z-index: 1000;
   box-sizing: border-box;
   box-shadow: 0 0 30px rgba(138,43,226,0.15), 0 1px 0 rgba(0,212,255,0.1);
+  gap: 12px;
 }
 
 /* Decorative top line */
@@ -124,7 +126,8 @@ body::before {
   display: none;
   flex-direction: column;
   cursor: pointer;
-  margin-right: 20px;
+  margin-left: 12px;
+  flex-shrink: 0;
 }
 .menu-toggle .bar {
   width: 22px; height: 2px;
@@ -169,7 +172,7 @@ body::before {
     0 0 80px rgba(0,0,0,0.6),
     inset 0 1px 0 rgba(186,125,255,0.08);
   position: relative;
-  overflow: hidden;
+  overflow: visible;
 }
 
 /* Corner decorations */
@@ -508,9 +511,10 @@ button:active { transform: translateY(0); }
   margin-bottom: 20px;
   flex-wrap: wrap;
   align-items: flex-start;
+  width: 100%;
 }
 
-.filters input, .filters select {
+.filters > input, .filters > select {
   flex: 1;
   min-width: 120px;
 }
@@ -533,7 +537,15 @@ button:active { transform: translateY(0); }
 #filter-section {
   width: 100%;
   margin-top: 8px;
-  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  /* display is controlled by JS (none/block), 
+     when shown we use flex via override below */
+}
+
+#filter-section[style*="display: block"],
+#filter-section[style*="display:block"] {
+  display: flex !important;
   flex-wrap: wrap;
   gap: 8px;
 }
@@ -867,35 +879,44 @@ button:active { transform: translateY(0); }
 /* === RESPONSIVE === */
 @media (max-width: 768px) {
   .nav {
-    position: absolute;
-    top: 60px; left: 0; right: 0;
+    position: fixed;
+    top: 64px; left: 0; right: 0;
     background: rgba(5, 3, 15, 0.99);
     backdrop-filter: blur(20px);
     width: 100%;
-    height: calc(100vh - 60px);
+    height: calc(100vh - 64px);
     display: none;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     border-top: 1px solid rgba(138,43,226,0.2);
+    z-index: 999;
   }
   .nav ul { flex-direction: column; gap: 36px; }
   .menu-toggle { display: flex; }
   .nav.active { display: flex; }
 
   #filter-section select,
-  #filter-section input { width: 100%; }
+  #filter-section input { width: 100% !important; flex: none; }
+
+  #btn-logout {
+    margin-right: 56px !important;
+    font-size: 9px !important;
+    padding: 5px 10px !important;
+  }
 }
 
 @media (max-width: 600px) {
-  .container { margin: 72px 10px 100px; padding: 16px; }
-  form, .filters { flex-direction: column; }
-  .filters input, .filters select { margin-bottom: 0; }
+  .container { margin: 72px 10px 110px; padding: 16px; }
+  form { flex-direction: column; }
+  .filters { flex-direction: column; }
+  .filters > input, .filters > select { width: 100%; min-width: unset; }
   .action-buttons { gap: 5px; padding: 6px 10px; }
   #send-whatsapp, #download-pdf, #export-excel {
     padding: 8px 12px;
     font-size: 9px;
     letter-spacing: 1px;
+    gap: 4px;
   }
 }
 
