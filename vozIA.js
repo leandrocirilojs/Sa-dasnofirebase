@@ -236,5 +236,5 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   });
 
-  log('vozIA carregado OK');
+  //log('vozIA carregado OK');
 });
