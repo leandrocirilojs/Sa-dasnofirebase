@@ -288,6 +288,7 @@ function carregarSaidas(startDate, endDate, driverFilter, storeFilter) {
   unsubscribe = onSnapshot(q, (snapshot) => {
     expenseList.innerHTML = '';
     filteredExpenses = [];
+    window.filteredExpenses = filteredExpenses;
     let total = 0;
     let totalProf = 0;
 
@@ -351,6 +352,7 @@ function carregarSaidas(startDate, endDate, driverFilter, storeFilter) {
         filteredExpenses.push(expense);
       }
     });
+    window.filteredExpenses = filteredExpenses;
 
     if (totalAmount) totalAmount.textContent = total.toFixed(2);
     if (totalProfit) totalProfit.textContent = totalProf.toFixed(2);
