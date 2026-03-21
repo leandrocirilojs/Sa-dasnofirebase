@@ -35,30 +35,65 @@
     .input-container i { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; color: white; }
     .input-container i:hover { color: #ba7dff; }
 
-    /* Botão flutuante WhatsApp */
-    #btn-wpp-flutuante {
-      position: fixed; bottom: 80px; right: 16px;
-      width: 54px; height: 54px; border-radius: 50%;
-      background: linear-gradient(135deg, #7e00ff, #00b5f4);
-      border: none; color: white; font-size: 22px;
-      cursor: pointer; z-index: 9998;
-      box-shadow: 0 4px 20px rgba(126,0,255,0.5);
-      display: flex; align-items: center; justify-content: center;
-      transition: transform 0.2s, box-shadow 0.2s; padding: 0;
-    }
-    #btn-wpp-flutuante:hover { transform: scale(1.1); box-shadow: 0 6px 24px rgba(126,0,255,0.7); }
-
     /* Painel WhatsApp flutuante */
     .whatsapp-scheduler-container {
       display: none;
       position: fixed !important;
-      bottom: 145px !important; right: 16px !important;
+      bottom: 90px !important; right: 16px !important;
       top: auto !important; left: auto !important;
       width: 300px !important;
       max-width: calc(100vw - 32px) !important;
       z-index: 9997 !important;
     }
     .whatsapp-scheduler-container.aberto { display: block !important; }
+
+    /* === FAB MENU === */
+    #fab-menu { position: fixed; bottom: 20px; right: 16px; z-index: 9999; display: flex; flex-direction: column; align-items: flex-end; gap: 12px; }
+
+    #fab-toggle {
+      width: 58px; height: 58px; border-radius: 50%;
+      background: linear-gradient(135deg, #7e00ff, #ba7dff);
+      border: none; color: white; font-size: 24px;
+      cursor: pointer; box-shadow: 0 4px 24px rgba(126,0,255,0.6);
+      display: flex; align-items: center; justify-content: center;
+      transition: transform 0.3s, box-shadow 0.3s; padding: 0;
+      position: relative; z-index: 2;
+    }
+    #fab-toggle:hover { transform: scale(1.08); box-shadow: 0 6px 28px rgba(126,0,255,0.8); }
+    #fab-toggle.aberto { transform: rotate(45deg); }
+
+    #fab-items { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
+    #fab-items .fab-item {
+      display: flex; align-items: center; gap: 10px;
+      opacity: 0; transform: translateY(16px) scale(0.85);
+      transition: opacity 0.22s, transform 0.22s;
+      pointer-events: none;
+    }
+    #fab-items.aberto .fab-item { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
+    #fab-items.aberto .fab-item:nth-child(1) { transition-delay: 0.08s; }
+    #fab-items.aberto .fab-item:nth-child(2) { transition-delay: 0.06s; }
+    #fab-items.aberto .fab-item:nth-child(3) { transition-delay: 0.04s; }
+    #fab-items.aberto .fab-item:nth-child(4) { transition-delay: 0.02s; }
+    #fab-items.aberto .fab-item:nth-child(5) { transition-delay: 0s; }
+
+    .fab-label {
+      background: rgba(10,4,26,0.92); color: #e0d6f5;
+      font-size: 12px; font-weight: 600; padding: 5px 10px;
+      border-radius: 8px; border: 1px solid rgba(186,125,255,0.2);
+      white-space: nowrap; backdrop-filter: blur(8px);
+    }
+    .fab-btn {
+      width: 48px; height: 48px; border-radius: 50%;
+      border: none; color: white; font-size: 18px;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: transform 0.2s, box-shadow 0.2s; padding: 0; flex-shrink: 0;
+    }
+    .fab-btn:hover { transform: scale(1.12); }
+    .fab-btn.verde   { background: linear-gradient(135deg, #1a7a3a, #25D366); box-shadow: 0 3px 14px rgba(37,211,102,0.45); }
+    .fab-btn.azul    { background: linear-gradient(135deg, #0070a8, #00b5f4); box-shadow: 0 3px 14px rgba(0,181,244,0.45); }
+    .fab-btn.vermelho{ background: linear-gradient(135deg, #7a1a1a, #dc3545); box-shadow: 0 3px 14px rgba(220,53,69,0.45); }
+    .fab-btn.roxo    { background: linear-gradient(135deg, #4a0099, #ba7dff); box-shadow: 0 3px 14px rgba(186,125,255,0.45); }
+    .fab-btn.wpp     { background: linear-gradient(135deg, #075e54, #25D366); box-shadow: 0 3px 14px rgba(37,211,102,0.45); }
   </style>
 </head>
 <body>
@@ -90,10 +125,34 @@
   <button id="whatsapp-scheduler-send" class="whatsapp-scheduler-button">Enviar WhatsApp</button>
 </div>
 
-<!-- Botão flutuante -->
-<button id="btn-wpp-flutuante" title="WhatsApp Clientes">
-  <i class="fab fa-whatsapp"></i>
-</button>
+<!-- FAB Menu -->
+<div id="fab-menu">
+  <div id="fab-items">
+    <div class="fab-item">
+      <span class="fab-label">WhatsApp Cliente</span>
+      <button class="fab-btn wpp" id="btn-wpp-flutuante" title="WhatsApp Clientes"><i class="fab fa-whatsapp"></i></button>
+    </div>
+    <div class="fab-item">
+      <span class="fab-label">Gráfico</span>
+      <button class="fab-btn roxo" id="show-chart" title="Gráfico"><i class="fa-solid fa-chart-bar"></i></button>
+    </div>
+    <div class="fab-item">
+      <span class="fab-label">PDF</span>
+      <button class="fab-btn vermelho" id="download-pdf" title="PDF"><i class="fa-solid fa-file-pdf"></i></button>
+    </div>
+    <div class="fab-item">
+      <span class="fab-label">WhatsApp Relatório</span>
+      <button class="fab-btn verde" id="send-whatsapp" title="WhatsApp Relatório"><i class="fa-brands fa-whatsapp"></i></button>
+    </div>
+    <div class="fab-item">
+      <span class="fab-label">Excel</span>
+      <button class="fab-btn azul" id="export-excel" title="Excel"><i class="fa-solid fa-file-excel"></i></button>
+    </div>
+  </div>
+  <button id="fab-toggle" title="Ações">
+    <i class="fa-solid fa-plus"></i>
+  </button>
+</div>
 
 <div class="container">
   <h1>Controle de Saídas</h1>
@@ -171,12 +230,7 @@
     <ul id="expenses"></ul>
   </div>
 
-  <div class="action-buttons">
-    <button id="export-excel"><i class="fa-solid fa-lg fa-file-excel" style="color:white;"></i> Excel</button>
-    <button id="send-whatsapp"><i class="fa-brands fa-lg fa-whatsapp" style="color:white;"></i> WhatsApp</button>
-    <button id="download-pdf"><i class="fa-solid fa-lg fa-file-pdf" style="color:white;"></i> PDF</button>
-    <button id="show-chart"><i class="fa-solid fa-lg fa-chart-bar" style="color:white;"></i> Gráfico</button>
-  </div>
+
 
   <!-- POPUP GRÁFICO -->
   <div id="chart-overlay" style="display:none; position:fixed; inset:0; background:rgba(5,2,18,0.92); z-index:10000; align-items:center; justify-content:center; padding:16px;">
@@ -241,21 +295,40 @@
     document.querySelector('#toggle-filters span').textContent = isHidden ? 'Ocultar Filtros' : 'Exibir Filtros';
   });
 
-  // Botão flutuante WhatsApp - abre/fecha painel
-  const btnWpp = document.getElementById('btn-wpp-flutuante');
+  // FAB Menu toggle
+  const fabToggle = document.getElementById('fab-toggle');
+  const fabItems  = document.getElementById('fab-items');
   const painelWpp = document.querySelector('.whatsapp-scheduler-container');
+  const btnWpp    = document.getElementById('btn-wpp-flutuante');
 
-  btnWpp.addEventListener('click', (e) => {
+  function fecharFab() {
+    fabToggle.classList.remove('aberto');
+    fabItems.classList.remove('aberto');
+    fabToggle.innerHTML = '<i class="fa-solid fa-plus"></i>';
+  }
+
+  fabToggle.addEventListener('click', (e) => {
     e.stopPropagation();
-    const aberto = painelWpp.classList.toggle('aberto');
-    btnWpp.innerHTML = aberto ? '<i class="fas fa-times"></i>' : '<i class="fab fa-whatsapp"></i>';
+    const aberto = fabItems.classList.toggle('aberto');
+    fabToggle.classList.toggle('aberto', aberto);
+    fabToggle.innerHTML = aberto ? '<i class="fa-solid fa-xmark"></i>' : '<i class="fa-solid fa-plus"></i>';
+    if (!aberto) {
+      painelWpp.classList.remove('aberto');
+    }
   });
 
   document.addEventListener('click', (e) => {
-    if (painelWpp.classList.contains('aberto') && !painelWpp.contains(e.target) && e.target !== btnWpp) {
+    const fab = document.getElementById('fab-menu');
+    if (!fab.contains(e.target) && !painelWpp.contains(e.target)) {
+      fecharFab();
       painelWpp.classList.remove('aberto');
-      btnWpp.innerHTML = '<i class="fab fa-whatsapp"></i>';
     }
+  });
+
+  // WhatsApp cliente — abre painel ao clicar no botão do FAB
+  btnWpp.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const aberto = painelWpp.classList.toggle('aberto');
   });
 
   // Mensagens predefinidas WhatsApp
