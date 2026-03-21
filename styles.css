@@ -761,9 +761,9 @@ button:active { transform: translateY(0); }
   display: none;
   position: fixed !important;
   bottom: 145px !important;
-  right: 16px !important;
+  right: auto !important;
   top: auto !important;
-  left: auto !important;
+  left: 10px !important;
   width: 300px !important;
   max-width: calc(100vw - 32px) !important;
   z-index: 9997 !important;
