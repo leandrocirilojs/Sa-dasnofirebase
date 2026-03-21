@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mrl-log-v18';
+const CACHE_NAME = 'mrl-log-v19';
 
 const urlsToCache = [
   './',
