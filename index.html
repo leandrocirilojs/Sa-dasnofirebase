@@ -289,6 +289,42 @@
 let chartSaidasInstance = null;
 let chartPesoInstance   = null;
 
+// Pré-carrega imagem da Fiorino
+var fiorino_img = new Image();
+fiorino_img.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCA2NCAzNic+PHJlY3QgeD0nMicgeT0nMTAnIHdpZHRoPSc0NCcgaGVpZ2h0PScyMCcgcng9JzMnIGZpbGw9J3doaXRlJy8+PHJlY3QgeD0nNDQnIHk9JzE2JyB3aWR0aD0nMTQnIGhlaWdodD0nMTQnIHJ4PScyJyBmaWxsPSd3aGl0ZScvPjxwYXRoIGQ9J000NCAxNiBMNTIgMTYgTDU4IDI0IEw0NCAyNFonIGZpbGw9JyNkZGQnLz48Y2lyY2xlIGN4PScxMicgY3k9JzMxJyByPSc0JyBmaWxsPScjNTU1Jy8+PGNpcmNsZSBjeD0nMTInIGN5PSczMScgcj0nMicgZmlsbD0nI2NjYycvPjxjaXJjbGUgY3g9JzUwJyBjeT0nMzEnIHI9JzQnIGZpbGw9JyM1NTUnLz48Y2lyY2xlIGN4PSc1MCcgY3k9JzMxJyByPScyJyBmaWxsPScjY2NjJy8+PHJlY3QgeD0nNicgeT0nMTMnIHdpZHRoPScxNCcgaGVpZ2h0PSc5JyByeD0nMScgZmlsbD0nI2FhZDRmNScvPjxyZWN0IHg9JzIyJyB5PScxMycgd2lkdGg9JzEwJyBoZWlnaHQ9JzknIHJ4PScxJyBmaWxsPScjYWFkNGY1Jy8+PC9zdmc+';
+// Fallback: emoji van como canvas se a imagem não carregar
+var fiorino_img_ok = false;
+fiorino_img.onload  = function(){ fiorino_img_ok = true; };
+fiorino_img.onerror = function(){ fiorino_img_ok = false; };
+
+// Plugin Chart.js: desenha fiorino no final de cada barra
+var pluginFiorino = {
+  id: 'fiorino',
+  afterDatasetDraw: function(chart, args) {
+    var ctx = chart.ctx;
+    var meta = chart.getDatasetMeta(args.index);
+    if (!meta || !meta.data) return;
+    meta.data.forEach(function(bar, i) {
+      var val = chart.data.datasets[args.index].data[i];
+      if (!val) return;
+      var x = bar.x; // ponta direita da barra
+      var y = bar.y; // centro vertical
+      var h = Math.abs(bar.height || 24);
+      var iconH = Math.min(h * 1.1, 32);
+      var iconW = iconH * 1.8;
+      ctx.save();
+      if (fiorino_img_ok) {
+        ctx.drawImage(fiorino_img, x + 4, y - iconH / 2, iconW, iconH);
+      } else {
+        // Fallback: desenha um mini retângulo com texto 🚐
+        ctx.font = (iconH * 0.85) + 'px serif';
+        ctx.fillText('🚐', x + 4, y + iconH * 0.35);
+      }
+      ctx.restore();
+    });
+  }
+};
+
 document.getElementById('show-chart').addEventListener('click', abrirGrafico);
 
 function abrirGrafico() {
@@ -321,8 +357,10 @@ function abrirGrafico() {
   const coresAzul    = ['#00b5f4','#0090d4','#00d4ff','#006fa8','#33c9ff','#0070a8','#1ad0ff','#004f80'];
   const coresLaranja = ['#ff8c00','#ff6a00','#ffa500','#e65c00','#ffb347','#cc5500','#ffcc44','#dd6600'];
 
+  // Padding direito extra para caber o ícone
   const baseOpts = {
     responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+    layout: { padding: { right: 56 } },
     plugins: {
       legend: { display: false },
       tooltip: { backgroundColor:'rgba(15,6,38,0.95)', titleColor:'#ba7dff', bodyColor:'#e0d6f5',
@@ -346,7 +384,8 @@ function abrirGrafico() {
       tooltip: Object.assign({}, baseOpts.plugins.tooltip, {
         callbacks: { label: function(ctx){ return ' ' + ctx.raw + (ctx.raw > 1 ? ' saídas' : ' saída'); } }
       })
-    })})
+    })}),
+    plugins: [pluginFiorino]
   });
 
   chartPesoInstance = new Chart(document.getElementById('chartPeso'), {
@@ -364,7 +403,8 @@ function abrirGrafico() {
           callbacks: { label: function(ctx){ return ' ' + ctx.raw + ' kg'; } }
         })
       })
-    })
+    }),
+    plugins: [pluginFiorino]
   });
 
   document.getElementById('chart-overlay').style.display = 'flex';
