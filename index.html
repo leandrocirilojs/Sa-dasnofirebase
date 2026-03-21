@@ -39,8 +39,8 @@
     .whatsapp-scheduler-container {
       display: none;
       position: fixed !important;
-      bottom: 90px !important; right: auto !important;
-      top: auto !important; left: 16px !important;
+      bottom: 90px !important; right: 16px !important;
+      top: auto !important; left: auto !important;
       width: 300px !important;
       max-width: calc(100vw - 32px) !important;
       z-index: 9997 !important;
@@ -271,10 +271,18 @@
       </div>
 
       <!-- Gráfico Peso -->
-      <div style="margin-bottom:10px;">
+      <div style="margin-bottom:28px;">
         <p style="color:rgba(255,160,60,0.8); font-size:11px; text-transform:uppercase; letter-spacing:1px; margin-bottom:10px;">Peso Total Transportado (kg) por Motorista</p>
         <div style="position:relative; height:200px;">
           <canvas id="chartPeso"></canvas>
+        </div>
+      </div>
+
+      <!-- Gráfico Lucro -->
+      <div style="margin-bottom:10px;">
+        <p style="color:rgba(37,211,102,0.8); font-size:11px; text-transform:uppercase; letter-spacing:1px; margin-bottom:10px;">💰 Lucro por Motorista (R$)</p>
+        <div style="position:relative; height:200px;">
+          <canvas id="chartLucro"></canvas>
         </div>
       </div>
     </div>
@@ -361,6 +369,7 @@
 // === GRÁFICO DE ENTREGAS ===
 let chartSaidasInstance = null;
 let chartPesoInstance   = null;
+let chartLucroInstance  = null;
 
 // Pré-carrega imagem da Fiorino
 var fiorino_img = new Image();
@@ -406,26 +415,31 @@ function abrirGrafico() {
 
   const por = {};
   dados.forEach(e => {
-    if (!por[e.driver]) por[e.driver] = { saidas: 0, peso: 0 };
+    if (!por[e.driver]) por[e.driver] = { saidas: 0, peso: 0, lucro: 0 };
     por[e.driver].saidas += 1;
     por[e.driver].peso   += parseFloat(e.weight || 0);
+    por[e.driver].lucro  += parseFloat(e.profit || 0);
   });
 
   const motoristas  = Object.keys(por);
   const qtdSaidas   = motoristas.map(m => por[m].saidas);
   const qtdPeso     = motoristas.map(m => parseFloat(por[m].peso.toFixed(1)));
+  const qtdLucro    = motoristas.map(m => parseFloat(por[m].lucro.toFixed(2)));
   const totalSaidas = qtdSaidas.reduce((a, b) => a + b, 0);
   const totalPeso   = qtdPeso.reduce((a, b) => a + b, 0);
+  const totalLucro  = qtdLucro.reduce((a, b) => a + b, 0);
 
   const sd = document.getElementById('filter-start-date')?.value || '';
   const ed = document.getElementById('filter-end-date')?.value   || '';
   document.getElementById('chart-subtitle').textContent =
     sd && ed ? 'Período: ' + fmt(sd) + ' a ' + fmt(ed) : sd ? 'A partir de ' + fmt(sd) : 'Todos os períodos';
 
+  const lucroFormatado = 'R$ ' + totalLucro.toFixed(2).replace('.', ',');
   document.getElementById('chart-totals').innerHTML =
     card('#7e00ff','#ba7dff', totalSaidas, 'Total de Saídas') +
     card('#b85000','#ff9a3c', totalPeso.toFixed(0) + ' kg', 'Peso Total') +
-    card('#006b3a','#25D366', motoristas.length, 'Motoristas');
+    card('#006b3a','#25D366', lucroFormatado, 'Lucro Total') +
+    card('#005080','#00b5f4', motoristas.length, 'Motoristas');
 
   const coresAzul    = ['#00b5f4','#0090d4','#00d4ff','#006fa8','#33c9ff','#0070a8','#1ad0ff','#004f80'];
   const coresLaranja = ['#ff8c00','#ff6a00','#ffa500','#e65c00','#ffb347','#cc5500','#ffcc44','#dd6600'];
@@ -447,6 +461,7 @@ function abrirGrafico() {
 
   if (chartSaidasInstance) { chartSaidasInstance.destroy(); chartSaidasInstance = null; }
   if (chartPesoInstance)   { chartPesoInstance.destroy();   chartPesoInstance   = null; }
+  if (chartLucroInstance)  { chartLucroInstance.destroy();  chartLucroInstance  = null; }
 
   chartSaidasInstance = new Chart(document.getElementById('chartSaidas'), {
     type: 'bar',
@@ -478,6 +493,30 @@ function abrirGrafico() {
       })
     }),
     plugins: [pluginFiorino]
+  });
+
+  // Cores verde para lucro — negativo fica vermelho
+  const coresVerde = qtdLucro.map(function(v) {
+    return v >= 0 ? '#25D366' : '#dc3545';
+  });
+
+  chartLucroInstance = new Chart(document.getElementById('chartLucro'), {
+    type: 'bar',
+    data: { labels: motoristas, datasets: [{ data: qtdLucro,
+      backgroundColor: coresVerde,
+      borderRadius: 6, borderSkipped: false }] },
+    options: Object.assign({}, baseOpts, {
+      layout: { padding: { right: 12 } },
+      scales: Object.assign({}, baseOpts.scales, {
+        x: Object.assign({}, baseOpts.scales.x, { ticks:{color:'rgba(37,211,102,0.5)',font:{size:11}} })
+      }),
+      plugins: Object.assign({}, baseOpts.plugins, {
+        tooltip: Object.assign({}, baseOpts.plugins.tooltip, {
+          titleColor:'#25D366',
+          callbacks: { label: function(ctx){ return ' R$ ' + ctx.raw.toFixed(2).replace('.',','); } }
+        })
+      })
+    })
   });
 
   document.getElementById('chart-overlay').style.display = 'flex';
