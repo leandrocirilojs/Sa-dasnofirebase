@@ -725,7 +725,7 @@ button:active { transform: translateY(0); }
   text-shadow: 0 0 8px var(--cyan);
 }
 
-/* === WHATSAPP FLOAT BUTTON === */
+/* === WHATSAPP FLOAT BUTTON === 
 #btn-wpp-flutuante {
   position: fixed !important;
   bottom: 80px !important;
@@ -755,6 +755,8 @@ button:active { transform: translateY(0); }
     0 0 30px rgba(138,43,226,0.7),
     0 0 60px rgba(0,212,255,0.3) !important;
 }
+ */
+
 
 /* === WHATSAPP PANEL === */
 .whatsapp-scheduler-container {
