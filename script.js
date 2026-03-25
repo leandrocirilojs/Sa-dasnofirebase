@@ -26,7 +26,6 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 
 // === HELPER TOAST ===
-// Usa a função global window.toast definida no index.html
 function showToast(titulo, mensagem, tipo = 'info', duracao = 4000) {
   if (typeof window.toast === 'function') {
     window.toast(titulo, mensagem, tipo, duracao);
@@ -209,7 +208,6 @@ function setupApp() {
     const btnSubmit = expenseForm.querySelector('button[type="submit"]');
     const textoOriginal = btnSubmit.innerHTML;
 
-    // Feedback visual no botão enquanto salva
     btnSubmit.disabled = true;
     btnSubmit.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Salvando...';
 
@@ -232,17 +230,14 @@ function setupApp() {
     try {
       await addDoc(collection(db, "saidas"), expense);
 
-      // Toast de confirmação com detalhes da saída
       showToast(
         'Saída Registrada',
         `${expense.driver} → ${expense.store} | R$ ${expense.received}`,
         'success'
       );
 
-      // Reseta apenas o NFs para 1
       document.getElementById('expense-nfs').value = '1';
 
-      // Mantém filtro do dia após adicionar
       const today = new Date().toISOString().split('T')[0];
       if (filterStartDate) filterStartDate.value = today;
       if (filterEndDate) filterEndDate.value = today;
@@ -267,7 +262,6 @@ function setupApp() {
         showToast('Erro ao Remover', erro.message, 'error', 6000);
       }
     } else if (password !== null) {
-      // null = usuário clicou em cancelar, sem mostrar erro
       showToast('Senha Incorreta', 'A saída não foi removida.', 'error');
     }
   };
@@ -398,49 +392,133 @@ function gerarPDF() {
   }
 
   const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-  const pageHeight = doc.internal.pageSize.getHeight();
-  const margin = 14;
-  let y = margin;
-  const lineHeight = 10;
+  const doc = new jsPDF({ orientation: 'landscape' });
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const margin = 10;
 
-  const addNewPage = () => { doc.addPage(); y = margin; };
+  // Cores iguais à planilha
+  const azulEscuro  = [31,  73, 125];
+  const azulClaro   = [189, 214, 238];
+  const amarelo     = [255, 242, 204];
+  const amareloTit  = [191, 144,   0];
+  const branco      = [255, 255, 255];
+  const pretoBranco = [30,  30,  30];
 
-  doc.setFontSize(18);
-  doc.text('Fechamento Tenda', margin, y);
-  y += lineHeight * 2;
+  // Formatar data de yyyy-mm-dd para dd/mm/yyyy
+  const fmtData = d => {
+    if (!d) return '';
+    const [a, m, dia] = d.split('-');
+    return `${dia}/${m}/${a}`;
+  };
 
-  const startDate = document.getElementById('filter-start-date')?.value || 'Não especificada';
-  const endDate = document.getElementById('filter-end-date')?.value || 'Não especificada';
-  doc.setFontSize(14);
-  doc.text(`Período: ${startDate} a ${endDate}`, margin, y);
-  y += lineHeight * 2;
+  const startDate = document.getElementById('filter-start-date')?.value || '';
+  const endDate   = document.getElementById('filter-end-date')?.value   || '';
 
-  doc.setFontSize(12);
-  doc.text('Motorista - Loja - Valor - Data - Peso (kg) - Qtd NFs', margin, y);
-  y += lineHeight;
+  // === TÍTULO ===
+  doc.setFontSize(13);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(...pretoBranco);
+  doc.text('FECHAMENTO TENDA', margin, 13);
 
-  let totalValue = 0, totalWeight = 0, totalNfs = 0;
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'normal');
+  if (startDate || endDate) {
+    doc.text(`Período: ${fmtData(startDate)} a ${fmtData(endDate)}`, margin, 19);
+  }
 
-  filteredExpenses.forEach((expense) => {
-    if (y + lineHeight > pageHeight - margin) addNewPage();
-    const text = `${expense.driver} - ${expense.store} - Valor: R$${expense.received} - Data: ${expense.date} - Peso: ${expense.weight || 0}kg - Nfs: ${expense.nfs || 0}`;
-    doc.text(text, margin, y);
-    y += lineHeight;
-    totalValue += parseFloat(expense.received || 0);
-    totalWeight += parseFloat(expense.weight || 0);
-    totalNfs += parseInt(expense.nfs || 0);
+  // === CABEÇALHO DUPLO (linha de grupo) ===
+  doc.autoTable({
+    startY: 22,
+    margin: { left: margin, right: margin },
+    tableWidth: pageWidth - margin * 2,
+    head: [[
+      {
+        content: 'DESTE LADO INFORMAÇÕES E OBSERVAÇÕES SOBRE AS VIAGENS E DIVERGÊNCIAS',
+        colSpan: 4,
+        styles: { halign: 'center', fillColor: azulEscuro, textColor: branco, fontStyle: 'bold', fontSize: 7 }
+      },
+      {
+        content: 'DESTA LADO VALORES A RECEBER (A ÚLTIMA COLUNA JÁ CALCULA OS VALORES)',
+        colSpan: 5,
+        styles: { halign: 'center', fillColor: amareloTit, textColor: branco, fontStyle: 'bold', fontSize: 7 }
+      },
+    ]],
+    body: [],
+    theme: 'plain',
   });
 
-  if (y + lineHeight * 5 > pageHeight - margin) addNewPage();
-  doc.setFontSize(14);
-  y += lineHeight;
-  doc.text(`Quantidade de Saídas: ${filteredExpenses.length}`, margin, y); y += lineHeight;
-  doc.text(`Peso Total: ${totalWeight.toFixed(2)} kg`, margin, y); y += lineHeight;
-  doc.text(`Total de NFs: ${totalNfs}`, margin, y); y += lineHeight;
-  doc.text(`Valor Total Recebido: R$ ${totalValue.toFixed(2)}`, margin, y);
-  doc.save('Relatorio_de_Saidas.pdf');
+  // === DADOS ===
+  let totalValue = 0, totalWeight = 0, totalNfs = 0;
 
+  const rows = filteredExpenses.map(e => {
+    const recebido = parseFloat(e.received || 0);
+    const pago     = parseFloat(e.amount   || 0);
+    totalValue  += recebido;
+    totalWeight += parseFloat(e.weight || 0);
+    totalNfs    += parseInt(e.nfs || 0);
+
+    return [
+      e.driver || '',
+      fmtData(e.date),
+      e.store  || '',
+      e.infor  || '',
+      e.pedEstacionamento ? `R$ ${parseFloat(e.pedEstacionamento).toFixed(2)}` : '',
+      e.km     ? `R$ ${parseFloat(e.km).toFixed(2)}` : '',
+      e.nfs    ? String(e.nfs) : '',
+      pago     ? `R$ ${pago.toFixed(2)}` : '',
+      `R$ ${recebido.toFixed(2)}`,
+    ];
+  });
+
+  // Linha de totais no final
+  rows.push([
+    { content: `Saídas: ${filteredExpenses.length}`, colSpan: 2, styles: { fontStyle: 'bold', fillColor: azulEscuro, textColor: branco, halign: 'center' } },
+    { content: `Peso Total: ${totalWeight.toFixed(0)} kg`, colSpan: 2, styles: { fontStyle: 'bold', fillColor: azulEscuro, textColor: branco, halign: 'center' } },
+    { content: `NFs: ${totalNfs}`, colSpan: 4, styles: { fontStyle: 'bold', fillColor: amareloTit, textColor: branco, halign: 'center' } },
+    { content: `R$ ${totalValue.toFixed(2)}`, styles: { fontStyle: 'bold', fillColor: amareloTit, textColor: branco, halign: 'right' } },
+  ]);
+
+  // === TABELA PRINCIPAL ===
+  doc.autoTable({
+    startY: doc.lastAutoTable.finalY,
+    margin: { left: margin, right: margin },
+    tableWidth: pageWidth - margin * 2,
+    head: [[
+      { content: 'TRANSPORTADOR\nMOTORISTA',                      styles: { fillColor: azulEscuro, textColor: branco } },
+      { content: 'DATA\nSAÍDA',                                   styles: { fillColor: azulEscuro, textColor: branco } },
+      { content: 'LOJA\nSAÍDA',                                   styles: { fillColor: azulEscuro, textColor: branco } },
+      { content: 'INFORMAÇÕES ADICIONAIS\n(NOTAS E SAÍDAS A MAIS)', styles: { fillColor: azulEscuro, textColor: branco } },
+      { content: 'PEDÁGIO\nESTACIONAMENTO R$',                    styles: { fillColor: amarelo, textColor: [100, 70, 0] } },
+      { content: 'KM\nEXCEDIDOS R$',                              styles: { fillColor: amarelo, textColor: [100, 70, 0] } },
+      { content: 'NOTAS E VIAGENS\nADICIONAIS R$',                styles: { fillColor: amarelo, textColor: [100, 70, 0] } },
+      { content: 'FRETE\nEMBARCADO R$',                           styles: { fillColor: amarelo, textColor: [100, 70, 0] } },
+      { content: 'FRETE\nTOTAL R$',                               styles: { fillColor: amarelo, textColor: [100, 70, 0] } },
+    ]],
+    body: rows,
+    theme: 'grid',
+    styles: { fontSize: 8, cellPadding: 3, valign: 'middle', textColor: pretoBranco },
+    headStyles: { fontStyle: 'bold', halign: 'center', fontSize: 7, minCellHeight: 10 },
+    // Linhas alternadas: azul claro nas 4 primeiras colunas, amarelo nas 5 últimas
+    didParseCell: function (data) {
+      if (data.section === 'body' && data.row.index < filteredExpenses.length) {
+        const isAzul = data.column.index < 4;
+        data.cell.styles.fillColor = isAzul ? azulClaro : amarelo;
+      }
+    },
+    columnStyles: {
+      0: { cellWidth: 30 },
+      1: { cellWidth: 20, halign: 'center' },
+      2: { cellWidth: 35 },
+      3: { cellWidth: 50 },
+      4: { cellWidth: 22, halign: 'right' },
+      5: { cellWidth: 22, halign: 'right' },
+      6: { cellWidth: 18, halign: 'center' },
+      7: { cellWidth: 25, halign: 'right' },
+      8: { cellWidth: 25, halign: 'right' },
+    },
+  });
+
+  doc.save('Relatorio_Saidas.pdf');
   showToast('PDF Gerado', 'Download iniciado com sucesso!', 'success');
 }
 
@@ -454,7 +532,7 @@ function exportToExcel() {
   const data = filteredExpenses.map(expense => [
     expense.driver, expense.date, expense.store,
     expense.infor, expense.pedEstacionamento, expense.km,
-    expense.nfs, expense.received, expense.received,
+    expense.nfs, expense.amount, expense.received,
   ]);
 
   const totalSaidas = filteredExpenses.length;
