@@ -536,40 +536,45 @@ function exportToExcel() {
     'INFORMAÇÕES ADICIONAIS\n(NOTAS ADICIONAIS E SAÍDAS A MAIS)',
     'PEDÁGIO\nESTACIONAMENTO\nR$',
     'KM\nEXCEDIDOS\nR$',
-    'NOTAS E VIAGENS\nADICIONAIS R$',
+    'NOTAS E VIAGENS\nADICIONAIS',
     'FRETE\nEMBARCADO R$',
     'FRETE TOTAL R$'
   ];
 
   const moeda = v => Number(v || 0);
+
   const fmtData = d => {
     if (!d) return '';
     const [a, m, dia] = d.split('-');
     return `${dia}/${m}/${a}`;
   };
 
+  // === LINHAS ===
   const rows = filteredExpenses.map(e => {
     const frete = moeda(e.received);
+
     return [
       e.driver || '',
       fmtData(e.date),
       e.store || '',
       '',
-      0,
-      0,
-     Number(e.nfs || 0),
+      '',
+      '',
+      Number(e.nfs || 0),
       frete,
       frete
     ];
   });
 
+  // Completa linhas vazias
   while (rows.length < 25) {
-    rows.push(['', '', '', '', 0, 0, 0, 0, 0]);
+    rows.push(['', '', '', '', '', '', '', '', '']);
   }
 
+  // === TOTAIS ===
   const totalPedagio = rows.reduce((s, r) => s + moeda(r[4]), 0);
   const totalKm = rows.reduce((s, r) => s + moeda(r[5]), 0);
-const totalNotas = rows.reduce((s, r) => s + Number(r[6] || 0), 0);
+  const totalNotas = rows.reduce((s, r) => s + Number(r[6] || 0), 0);
   const totalEmbarcado = rows.reduce((s, r) => s + moeda(r[7]), 0);
   const totalFrete = rows.reduce((s, r) => s + moeda(r[8]), 0);
 
@@ -581,6 +586,7 @@ const totalNotas = rows.reduce((s, r) => s + Number(r[6] || 0), 0);
 
   const ws = XLSX.utils.aoa_to_sheet(data);
 
+  // === LARGURA COLUNAS ===
   ws['!cols'] = [
     { wch: 24 },
     { wch: 16 },
@@ -588,11 +594,12 @@ const totalNotas = rows.reduce((s, r) => s + Number(r[6] || 0), 0);
     { wch: 46 },
     { wch: 20 },
     { wch: 15 },
-    { wch: 22 },
+    { wch: 18 },
     { wch: 20 },
     { wch: 22 }
   ];
 
+  // === ALTURA LINHAS ===
   ws['!rows'] = [
     { hpt: 48 },
     ...rows.map(() => ({ hpt: 22 })),
@@ -608,10 +615,13 @@ const totalNotas = rows.reduce((s, r) => s + Number(r[6] || 0), 0);
     right: { style: 'thin', color: { rgb: '000000' } }
   };
 
+  // === ESTILIZAÇÃO ===
   for (let R = range.s.r; R <= range.e.r; R++) {
     for (let C = range.s.c; C <= range.e.c; C++) {
+
       const cellRef = XLSX.utils.encode_cell({ r: R, c: C });
-      if (!ws[cellRef]) ws[cellRef] = { t: 's', v: '' };
+
+      if (!ws[cellRef]) continue;
 
       ws[cellRef].s = {
         border,
@@ -623,13 +633,16 @@ const totalNotas = rows.reduce((s, r) => s + Number(r[6] || 0), 0);
         font: {
           name: 'Calibri',
           sz: 11,
-          bold: false,
           color: { rgb: '000000' }
         }
       };
 
+      // CABEÇALHO
       if (R === 0) {
-        ws[cellRef].s.fill = { fgColor: { rgb: '2F5597' } };
+        ws[cellRef].s.fill = {
+          fgColor: { rgb: '2F5597' }
+        };
+
         ws[cellRef].s.font = {
           name: 'Calibri',
           sz: 11,
@@ -638,50 +651,76 @@ const totalNotas = rows.reduce((s, r) => s + Number(r[6] || 0), 0);
         };
       }
 
-
-
-      
+      // COLUNAS AZUL CLARO
       if (R > 0 && R < range.e.r && C >= 4 && C <= 7) {
-        ws[cellRef].s.fill = { fgColor: { rgb: 'D9E2F3' } };
+        ws[cellRef].s.fill = {
+          fgColor: { rgb: 'D9E2F3' }
+        };
       }
 
+      // COLUNA TOTAL AMARELA
       if (R > 0 && R < range.e.r && C === 8) {
-        ws[cellRef].s.fill = { fgColor: { rgb: 'FFF2CC' } };
+        ws[cellRef].s.fill = {
+          fgColor: { rgb: 'FFF2CC' }
+        };
+
         ws[cellRef].s.font.bold = true;
       }
 
+      // RODAPÉ TOTAL
       if (R === range.e.r) {
-        ws[cellRef].s.fill = { fgColor: { rgb: 'D9D9D9' } };
+        ws[cellRef].s.fill = {
+          fgColor: { rgb: 'D9D9D9' }
+        };
+
         ws[cellRef].s.font.bold = true;
       }
 
-    if (R > 0 && C >= 4 && C <= 8) {
-  if (ws[cellRef].v === '') ws[cellRef].v = 0;
-  ws[cellRef].t = 'n';
+      // FORMATAÇÃO NUMÉRICA
+      if (
+        R > 0 &&
+        C >= 4 &&
+        C <= 8 &&
+        ws[cellRef].v !== ''
+      ) {
 
-  if ([4, 5, 7, 8].includes(C)) {
-    ws[cellRef].z = '"R$" #,##0.00';
-  }
+        ws[cellRef].t = 'n';
 
-  if (C === 6) {
-    ws[cellRef].z = '0';
-  }
-}
+        // MOEDA
+        if ([4,5,7,8].includes(C)) {
+          ws[cellRef].z = '"R$" #,##0.00';
+        }
 
-
-      
+        // NFs
+        if (C === 6) {
+          ws[cellRef].z = '0';
+        }
+      }
     }
   }
 
+  // === CRIAR PLANILHA ===
   const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'Relatório MRL');
+
+  XLSX.utils.book_append_sheet(
+    wb,
+    ws,
+    'Relatório MRL'
+  );
 
   const hoje = new Date().toISOString().split('T')[0];
-  XLSX.writeFile(wb, `Relatorio_MRL_${hoje}.xlsx`);
 
-  showToast('Excel Gerado', 'Planilha no modelo MRL exportada com sucesso!', 'success');
+  XLSX.writeFile(
+    wb,
+    `Relatorio_MRL_${hoje}.xlsx`
+  );
+
+  showToast(
+    'Excel Gerado',
+    'Planilha exportada com sucesso!',
+    'success'
+  );
 }
-
 // === WHATSAPP RELATÓRIO ===
 function enviarWhatsApp() {
   if (filteredExpenses.length === 0) {
