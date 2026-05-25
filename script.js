@@ -638,6 +638,9 @@ const totalNotas = rows.reduce((s, r) => s + Number(r[6] || 0), 0);
         };
       }
 
+
+
+      
       if (R > 0 && R < range.e.r && C >= 4 && C <= 7) {
         ws[cellRef].s.fill = { fgColor: { rgb: 'D9E2F3' } };
       }
@@ -652,22 +655,21 @@ const totalNotas = rows.reduce((s, r) => s + Number(r[6] || 0), 0);
         ws[cellRef].s.font.bold = true;
       }
 
-     if (R > 0) {
-
-  // Garante número
+    if (R > 0 && C >= 4 && C <= 8) {
   if (ws[cellRef].v === '') ws[cellRef].v = 0;
   ws[cellRef].t = 'n';
 
-  // COLUNAS MONETÁRIAS
-  if ([4,5,7,8].includes(C)) {
+  if ([4, 5, 7, 8].includes(C)) {
     ws[cellRef].z = '"R$" #,##0.00';
   }
 
-  // COLUNA NFs
   if (C === 6) {
     ws[cellRef].z = '0';
   }
 }
+
+
+      
     }
   }
 
