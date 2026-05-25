@@ -569,7 +569,7 @@ function exportToExcel() {
 
   const totalPedagio = rows.reduce((s, r) => s + moeda(r[4]), 0);
   const totalKm = rows.reduce((s, r) => s + moeda(r[5]), 0);
-  const totalNotas = rows.reduce((s, r) => s + moeda(r[6]), 0);
+const totalNotas = rows.reduce((s, r) => s + Number(r[6] || 0), 0);
   const totalEmbarcado = rows.reduce((s, r) => s + moeda(r[7]), 0);
   const totalFrete = rows.reduce((s, r) => s + moeda(r[8]), 0);
 
