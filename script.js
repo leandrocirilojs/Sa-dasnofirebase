@@ -652,11 +652,22 @@ const totalNotas = rows.reduce((s, r) => s + Number(r[6] || 0), 0);
         ws[cellRef].s.font.bold = true;
       }
 
-      if (C >= 4 && C <= 8 && R > 0) {
-        ws[cellRef].z = '"R$" #,##0.00';
-        if (ws[cellRef].v === '') ws[cellRef].v = 0;
-        ws[cellRef].t = 'n';
-      }
+     if (R > 0) {
+
+  // Garante número
+  if (ws[cellRef].v === '') ws[cellRef].v = 0;
+  ws[cellRef].t = 'n';
+
+  // COLUNAS MONETÁRIAS
+  if ([4,5,7,8].includes(C)) {
+    ws[cellRef].z = '"R$" #,##0.00';
+  }
+
+  // COLUNA NFs
+  if (C === 6) {
+    ws[cellRef].z = '0';
+  }
+}
     }
   }
 
