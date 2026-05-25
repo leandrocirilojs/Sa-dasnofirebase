@@ -557,7 +557,7 @@ function exportToExcel() {
       '',
       0,
       0,
-      0,
+     Number(e.nfs || 0),
       frete,
       frete
     ];
