@@ -529,124 +529,144 @@ function exportToExcel() {
     return;
   }
 
+  const headers = [
+    'TRANSPORTADOR\nMOTORISTA',
+    'DATA SAÍDA',
+    'LOJA SAÍDA',
+    'INFORMAÇÕES ADICIONAIS\n(NOTAS ADICIONAIS E SAÍDAS A MAIS)',
+    'PEDÁGIO\nESTACIONAMENTO\nR$',
+    'KM\nEXCEDIDOS\nR$',
+    'NOTAS E VIAGENS\nADICIONAIS R$',
+    'FRETE\nEMBARCADO R$',
+    'FRETE TOTAL R$'
+  ];
+
+  const moeda = v => Number(v || 0);
   const fmtData = d => {
     if (!d) return '';
     const [a, m, dia] = d.split('-');
     return `${dia}/${m}/${a}`;
   };
 
-  const moeda = v => Number(v || 0);
-  const wb = XLSX.utils.book_new();
-
-  let totalPago = 0;
-  let totalRecebido = 0;
-  let totalLucro = 0;
-  let totalPeso = 0;
-  let totalNfs = 0;
-
-  const linhas = filteredExpenses.map(e => {
-    const pago = moeda(e.amount);
-    const recebido = moeda(e.received);
-    const lucro = moeda(e.profit);
-    const peso = moeda(e.weight);
-    const nfs = parseInt(e.nfs || 0);
-
-    totalPago += pago;
-    totalRecebido += recebido;
-    totalLucro += lucro;
-    totalPeso += peso;
-    totalNfs += nfs;
-
+  const rows = filteredExpenses.map(e => {
+    const frete = moeda(e.received);
     return [
       e.driver || '',
       fmtData(e.date),
       e.store || '',
-      peso,
-      nfs,
-      pago,
-      recebido,
-      lucro
+      '',
+      0,
+      0,
+      0,
+      frete,
+      frete
     ];
   });
 
-  const dadosRelatorio = [
-    ['RELATÓRIO DE SAÍDAS MRL'],
-    [],
-    ['Motorista', 'Data', 'Loja', 'Peso KG', 'Qtd NFs', 'Valor Pago', 'Valor Recebido', 'Lucro'],
-    ...linhas,
-    [],
-    ['TOTAL', '', '', totalPeso, totalNfs, totalPago, totalRecebido, totalLucro]
+  while (rows.length < 25) {
+    rows.push(['', '', '', '', 0, 0, 0, 0, 0]);
+  }
+
+  const totalPedagio = rows.reduce((s, r) => s + moeda(r[4]), 0);
+  const totalKm = rows.reduce((s, r) => s + moeda(r[5]), 0);
+  const totalNotas = rows.reduce((s, r) => s + moeda(r[6]), 0);
+  const totalEmbarcado = rows.reduce((s, r) => s + moeda(r[7]), 0);
+  const totalFrete = rows.reduce((s, r) => s + moeda(r[8]), 0);
+
+  const data = [
+    headers,
+    ...rows,
+    ['', '', '', '', totalPedagio, totalKm, totalNotas, totalEmbarcado, totalFrete]
   ];
 
-  const wsRelatorio = XLSX.utils.aoa_to_sheet(dadosRelatorio);
+  const ws = XLSX.utils.aoa_to_sheet(data);
 
-  wsRelatorio['!cols'] = [
-    { wch: 18 },
-    { wch: 14 },
-    { wch: 25 },
-    { wch: 12 },
-    { wch: 10 },
-    { wch: 14 },
+  ws['!cols'] = [
+    { wch: 24 },
     { wch: 16 },
-    { wch: 14 }
+    { wch: 18 },
+    { wch: 46 },
+    { wch: 20 },
+    { wch: 15 },
+    { wch: 22 },
+    { wch: 20 },
+    { wch: 22 }
   ];
 
-  XLSX.utils.book_append_sheet(wb, wsRelatorio, 'Relatório');
+  ws['!rows'] = [
+    { hpt: 48 },
+    ...rows.map(() => ({ hpt: 22 })),
+    { hpt: 24 }
+  ];
 
-  const resumoMotoristas = {};
-  const resumoLojas = {};
+  const range = XLSX.utils.decode_range(ws['!ref']);
 
-  filteredExpenses.forEach(e => {
-    const motorista = e.driver || 'Sem motorista';
-    const loja = e.store || 'Sem loja';
-
-    if (!resumoMotoristas[motorista]) {
-      resumoMotoristas[motorista] = { saidas: 0, peso: 0, nfs: 0, pago: 0, recebido: 0, lucro: 0 };
-    }
-
-    if (!resumoLojas[loja]) {
-      resumoLojas[loja] = { saidas: 0, peso: 0, nfs: 0, pago: 0, recebido: 0, lucro: 0 };
-    }
-
-    [resumoMotoristas[motorista], resumoLojas[loja]].forEach(r => {
-      r.saidas += 1;
-      r.peso += moeda(e.weight);
-      r.nfs += parseInt(e.nfs || 0);
-      r.pago += moeda(e.amount);
-      r.recebido += moeda(e.received);
-      r.lucro += moeda(e.profit);
-    });
-  });
-
-  const criarResumo = (titulo, obj) => {
-    return [
-      [titulo],
-      [],
-      ['Nome', 'Saídas', 'Peso KG', 'Qtd NFs', 'Valor Pago', 'Valor Recebido', 'Lucro'],
-      ...Object.entries(obj).map(([nome, r]) => [
-        nome,
-        r.saidas,
-        r.peso,
-        r.nfs,
-        r.pago,
-        r.recebido,
-        r.lucro
-      ])
-    ];
+  const border = {
+    top: { style: 'thin', color: { rgb: '000000' } },
+    bottom: { style: 'thin', color: { rgb: '000000' } },
+    left: { style: 'thin', color: { rgb: '000000' } },
+    right: { style: 'thin', color: { rgb: '000000' } }
   };
 
-  const wsMotoristas = XLSX.utils.aoa_to_sheet(criarResumo('RESUMO POR MOTORISTA', resumoMotoristas));
-  wsMotoristas['!cols'] = [{ wch: 22 }, { wch: 10 }, { wch: 12 }, { wch: 10 }, { wch: 14 }, { wch: 16 }, { wch: 14 }];
-  XLSX.utils.book_append_sheet(wb, wsMotoristas, 'Motoristas');
+  for (let R = range.s.r; R <= range.e.r; R++) {
+    for (let C = range.s.c; C <= range.e.c; C++) {
+      const cellRef = XLSX.utils.encode_cell({ r: R, c: C });
+      if (!ws[cellRef]) ws[cellRef] = { t: 's', v: '' };
 
-  const wsLojas = XLSX.utils.aoa_to_sheet(criarResumo('RESUMO POR LOJA', resumoLojas));
-  wsLojas['!cols'] = [{ wch: 28 }, { wch: 10 }, { wch: 12 }, { wch: 10 }, { wch: 14 }, { wch: 16 }, { wch: 14 }];
-  XLSX.utils.book_append_sheet(wb, wsLojas, 'Lojas');
+      ws[cellRef].s = {
+        border,
+        alignment: {
+          horizontal: 'center',
+          vertical: 'center',
+          wrapText: true
+        },
+        font: {
+          name: 'Calibri',
+          sz: 11,
+          bold: false,
+          color: { rgb: '000000' }
+        }
+      };
+
+      if (R === 0) {
+        ws[cellRef].s.fill = { fgColor: { rgb: '2F5597' } };
+        ws[cellRef].s.font = {
+          name: 'Calibri',
+          sz: 11,
+          bold: true,
+          color: { rgb: 'FFFFFF' }
+        };
+      }
+
+      if (R > 0 && R < range.e.r && C >= 4 && C <= 7) {
+        ws[cellRef].s.fill = { fgColor: { rgb: 'D9E2F3' } };
+      }
+
+      if (R > 0 && R < range.e.r && C === 8) {
+        ws[cellRef].s.fill = { fgColor: { rgb: 'FFF2CC' } };
+        ws[cellRef].s.font.bold = true;
+      }
+
+      if (R === range.e.r) {
+        ws[cellRef].s.fill = { fgColor: { rgb: 'D9D9D9' } };
+        ws[cellRef].s.font.bold = true;
+      }
+
+      if (C >= 4 && C <= 8 && R > 0) {
+        ws[cellRef].z = '"R$" #,##0.00';
+        if (ws[cellRef].v === '') ws[cellRef].v = 0;
+        ws[cellRef].t = 'n';
+      }
+    }
+  }
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Relatório MRL');
 
   const hoje = new Date().toISOString().split('T')[0];
   XLSX.writeFile(wb, `Relatorio_MRL_${hoje}.xlsx`);
 
-  showToast('Excel Gerado', 'Relatório completo exportado com sucesso!', 'success');
+  showToast('Excel Gerado', 'Planilha no modelo MRL exportada com sucesso!', 'success');
 }
 
 // === WHATSAPP RELATÓRIO ===
