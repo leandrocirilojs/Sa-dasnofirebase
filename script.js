@@ -529,31 +529,124 @@ function exportToExcel() {
     return;
   }
 
-  const data = filteredExpenses.map(expense => [
-    expense.driver, expense.date, expense.store,
-    expense.infor, expense.pedEstacionamento, expense.km,
-    expense.nfs, expense.amount, expense.received,
-  ]);
+  const fmtData = d => {
+    if (!d) return '';
+    const [a, m, dia] = d.split('-');
+    return `${dia}/${m}/${a}`;
+  };
 
-  const totalSaidas = filteredExpenses.length;
-  const valorTotal = filteredExpenses.reduce((t, e) => t + parseFloat(e.received || 0), 0);
-
-  data.push([], [], []);
-  data.push(['', '', '', '', '', '', '', totalSaidas, `R$ ${valorTotal.toFixed(2)}`]);
-
-  const ws = XLSX.utils.aoa_to_sheet([
-    ['TRANSPORTADOR MOTORISTA', 'DATA SAIDA', 'LOJA SAÍDA',
-     'INFORMAÇÕES ADICIONAIS', 'PEDAGIO ESTACIONAMENTO R$',
-     'KM EXCEDIDOS R$', 'NOTAS E VIAGENS ADICIONAIS',
-     'FRETE EMBARCADO', 'FRETE TOTAL R$'],
-    ...data
-  ]);
-
+  const moeda = v => Number(v || 0);
   const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'Saídas');
-  XLSX.writeFile(wb, 'Relatorio_Saidas.xlsx');
 
-  showToast('Excel Gerado', 'Download iniciado com sucesso!', 'success');
+  let totalPago = 0;
+  let totalRecebido = 0;
+  let totalLucro = 0;
+  let totalPeso = 0;
+  let totalNfs = 0;
+
+  const linhas = filteredExpenses.map(e => {
+    const pago = moeda(e.amount);
+    const recebido = moeda(e.received);
+    const lucro = moeda(e.profit);
+    const peso = moeda(e.weight);
+    const nfs = parseInt(e.nfs || 0);
+
+    totalPago += pago;
+    totalRecebido += recebido;
+    totalLucro += lucro;
+    totalPeso += peso;
+    totalNfs += nfs;
+
+    return [
+      e.driver || '',
+      fmtData(e.date),
+      e.store || '',
+      peso,
+      nfs,
+      pago,
+      recebido,
+      lucro
+    ];
+  });
+
+  const dadosRelatorio = [
+    ['RELATÓRIO DE SAÍDAS MRL'],
+    [],
+    ['Motorista', 'Data', 'Loja', 'Peso KG', 'Qtd NFs', 'Valor Pago', 'Valor Recebido', 'Lucro'],
+    ...linhas,
+    [],
+    ['TOTAL', '', '', totalPeso, totalNfs, totalPago, totalRecebido, totalLucro]
+  ];
+
+  const wsRelatorio = XLSX.utils.aoa_to_sheet(dadosRelatorio);
+
+  wsRelatorio['!cols'] = [
+    { wch: 18 },
+    { wch: 14 },
+    { wch: 25 },
+    { wch: 12 },
+    { wch: 10 },
+    { wch: 14 },
+    { wch: 16 },
+    { wch: 14 }
+  ];
+
+  XLSX.utils.book_append_sheet(wb, wsRelatorio, 'Relatório');
+
+  const resumoMotoristas = {};
+  const resumoLojas = {};
+
+  filteredExpenses.forEach(e => {
+    const motorista = e.driver || 'Sem motorista';
+    const loja = e.store || 'Sem loja';
+
+    if (!resumoMotoristas[motorista]) {
+      resumoMotoristas[motorista] = { saidas: 0, peso: 0, nfs: 0, pago: 0, recebido: 0, lucro: 0 };
+    }
+
+    if (!resumoLojas[loja]) {
+      resumoLojas[loja] = { saidas: 0, peso: 0, nfs: 0, pago: 0, recebido: 0, lucro: 0 };
+    }
+
+    [resumoMotoristas[motorista], resumoLojas[loja]].forEach(r => {
+      r.saidas += 1;
+      r.peso += moeda(e.weight);
+      r.nfs += parseInt(e.nfs || 0);
+      r.pago += moeda(e.amount);
+      r.recebido += moeda(e.received);
+      r.lucro += moeda(e.profit);
+    });
+  });
+
+  const criarResumo = (titulo, obj) => {
+    return [
+      [titulo],
+      [],
+      ['Nome', 'Saídas', 'Peso KG', 'Qtd NFs', 'Valor Pago', 'Valor Recebido', 'Lucro'],
+      ...Object.entries(obj).map(([nome, r]) => [
+        nome,
+        r.saidas,
+        r.peso,
+        r.nfs,
+        r.pago,
+        r.recebido,
+        r.lucro
+      ])
+    ];
+  };
+
+  const wsMotoristas = XLSX.utils.aoa_to_sheet(criarResumo('RESUMO POR MOTORISTA', resumoMotoristas));
+  wsMotoristas['!cols'] = [{ wch: 22 }, { wch: 10 }, { wch: 12 }, { wch: 10 }, { wch: 14 }, { wch: 16 }, { wch: 14 }];
+  XLSX.utils.book_append_sheet(wb, wsMotoristas, 'Motoristas');
+
+  const wsLojas = XLSX.utils.aoa_to_sheet(criarResumo('RESUMO POR LOJA', resumoLojas));
+  wsLojas['!cols'] = [{ wch: 28 }, { wch: 10 }, { wch: 12 }, { wch: 10 }, { wch: 14 }, { wch: 16 }, { wch: 14 }];
+  XLSX.utils.book_append_sheet(wb, wsLojas, 'Lojas');
+
+  const hoje = new Date().toISOString().split('T')[0];
+  XLSX.writeFile(wb, `Relatorio_MRL_${hoje}.xlsx`);
+
+  showToast('Excel Gerado', 'Relatório completo exportado com sucesso!', 'success');
 }
 
 // === WHATSAPP RELATÓRIO ===
