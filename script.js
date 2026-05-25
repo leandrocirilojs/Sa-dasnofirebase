@@ -34,7 +34,7 @@ function showToast(titulo, mensagem, tipo = 'info', duracao = 4000) {
   }
 }
 
-// === TELA DE LOGIN ===
+// === TELA DE LOGIN E SENHA===
 function criarTelaLogin() {
   const div = document.createElement('div');
   div.id = 'tela-login';
