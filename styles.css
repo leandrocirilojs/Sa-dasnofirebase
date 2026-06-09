@@ -566,18 +566,16 @@ button:active {
 
 /* === FAB MENU === */
 #fab-menu {
-  position: fixed;
-  bottom: 20px;
-  right: 16px;
-  z-index: 9999;
-  display: none;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 10px;
+  position: fixed !important;
+  bottom: 20px !important;
+  right: 16px !important;
+  z-index: 9999 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-end !important;
+  gap: 10px !important;
+  pointer-events: none !important;
 }
-#fab-menu.active{
-display: flex;
-};
 
 #fab-toggle {
   width: 54px;
@@ -597,6 +595,7 @@ display: flex;
   position: relative;
   z-index: 2;
   letter-spacing: 0;
+  pointer-events: auto !important;
 }
 
 #fab-toggle:hover {
@@ -612,10 +611,20 @@ display: flex;
 }
 
 #fab-items {
-  display: flex;
+  display: none !important;
   flex-direction: column;
   align-items: flex-end;
   gap: 8px;
+  pointer-events: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
+
+#fab-items.aberto {
+  display: flex !important;
+  pointer-events: auto !important;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
 #fab-items .fab-item {
@@ -630,10 +639,10 @@ display: flex;
 }
 
 #fab-items.aberto .fab-item {
-  opacity: 1;
+  opacity: 1 !important;
   transform: translateY(0) scale(1);
-  pointer-events: auto;
-  visibility: visible;
+  pointer-events: auto !important;
+  visibility: visible !important;
 }
 
 #fab-items.aberto .fab-item:nth-child(1) { transition-delay: 0.08s; }
@@ -672,6 +681,7 @@ display: flex;
   padding: 0;
   flex-shrink: 0;
   letter-spacing: 0;
+  pointer-events: auto !important;
 }
 
 .fab-btn:hover { transform: scale(1.1); }
@@ -1213,12 +1223,6 @@ display: flex;
 }
 
 
-
-
-
-
-
-
 /* ==================================
    DESKTOP PROFESSIONAL LAYOUT
 ================================== */
@@ -1266,37 +1270,4 @@ display: flex;
     margin: 0;
   }
 
-}
-
-
-
-
-/* CORREÇÃO DEFINITIVA — FAB invisível bloqueando tela */
-
-#fab-menu {
-  pointer-events: none !important;
-}
-
-#fab-toggle {
-  pointer-events: auto !important;
-}
-
-#fab-items {
-  display: none !important;
-  pointer-events: none !important;
-  visibility: hidden !important;
-  opacity: 0 !important;
-}
-
-#fab-items.aberto {
-  display: flex !important;
-  pointer-events: auto !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-}
-
-#fab-items.aberto .fab-item {
-  pointer-events: auto !important;
-  visibility: visible !important;
-  opacity: 1 !important;
 }
