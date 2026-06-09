@@ -566,16 +566,18 @@ button:active {
 
 /* === FAB MENU === */
 #fab-menu {
-  position: fixed !important;
-  bottom: 20px !important;
-  right: 16px !important;
-  z-index: 9999 !important;
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: flex-end !important;
-  gap: 10px !important;
-  pointer-events: none !important;
+  position: fixed;
+  bottom: 20px;
+  right: 16px;
+  z-index: 9999;
+  display: none;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
 }
+#fab-menu.active{
+display: flex;
+};
 
 #fab-toggle {
   width: 54px;
@@ -595,7 +597,6 @@ button:active {
   position: relative;
   z-index: 2;
   letter-spacing: 0;
-  pointer-events: auto !important;
 }
 
 #fab-toggle:hover {
@@ -611,20 +612,10 @@ button:active {
 }
 
 #fab-items {
-  display: none !important;
+  display: flex;
   flex-direction: column;
   align-items: flex-end;
   gap: 8px;
-  pointer-events: none !important;
-  visibility: hidden !important;
-  opacity: 0 !important;
-}
-
-#fab-items.aberto {
-  display: flex !important;
-  pointer-events: auto !important;
-  visibility: visible !important;
-  opacity: 1 !important;
 }
 
 #fab-items .fab-item {
@@ -639,10 +630,10 @@ button:active {
 }
 
 #fab-items.aberto .fab-item {
-  opacity: 1 !important;
+  opacity: 1;
   transform: translateY(0) scale(1);
-  pointer-events: auto !important;
-  visibility: visible !important;
+  pointer-events: auto;
+  visibility: visible;
 }
 
 #fab-items.aberto .fab-item:nth-child(1) { transition-delay: 0.08s; }
@@ -681,7 +672,6 @@ button:active {
   padding: 0;
   flex-shrink: 0;
   letter-spacing: 0;
-  pointer-events: auto !important;
 }
 
 .fab-btn:hover { transform: scale(1.1); }
@@ -1223,6 +1213,12 @@ button:active {
 }
 
 
+
+
+
+
+
+
 /* ==================================
    DESKTOP PROFESSIONAL LAYOUT
 ================================== */
@@ -1270,4 +1266,432 @@ button:active {
     margin: 0;
   }
 
+}
+
+
+
+
+/* CORREÇÃO DEFINITIVA — FAB invisível bloqueando tela */
+
+#fab-menu {
+  pointer-events: none !important;
+}
+
+#fab-toggle {
+  pointer-events: auto !important;
+}
+
+#fab-items {
+  display: none !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
+
+#fab-items.aberto {
+  display: flex !important;
+  pointer-events: auto !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+#fab-items.aberto .fab-item {
+  pointer-events: auto !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+/* =====================================================
+   MRL LOG — 7 MELHORIAS DE DESIGN
+   Dashboard visual, cards premium, filtros, dark tech,
+   header blur, estado vazio e animações leves.
+   Mantém HTML/JS intactos.
+===================================================== */
+
+:root {
+  --tech-bg-1: #090b12;
+  --tech-bg-2: #101827;
+  --tech-card: rgba(16, 24, 39, 0.78);
+  --tech-card-strong: rgba(22, 32, 52, 0.92);
+  --tech-line: rgba(94, 234, 212, 0.18);
+  --tech-line-strong: rgba(94, 234, 212, 0.38);
+  --tech-text: #edf7ff;
+  --tech-muted: #9fb3c8;
+  --tech-accent: #22d3ee;
+  --tech-accent-2: #a78bfa;
+  --tech-green: #22c55e;
+  --tech-red: #fb7185;
+  --tech-yellow: #facc15;
+  --tech-shadow: 0 18px 70px rgba(0, 0, 0, 0.35);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background:
+    radial-gradient(circle at 12% 8%, rgba(34, 211, 238, 0.16), transparent 30%),
+    radial-gradient(circle at 88% 18%, rgba(167, 139, 250, 0.14), transparent 32%),
+    radial-gradient(circle at 50% 100%, rgba(34, 197, 94, 0.08), transparent 34%),
+    linear-gradient(135deg, var(--tech-bg-1), var(--tech-bg-2));
+  color: var(--tech-text);
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size: 42px 42px;
+  mask-image: linear-gradient(to bottom, rgba(0,0,0,0.75), transparent 80%);
+  z-index: -1;
+}
+
+/* 1) Header premium com blur */
+.header {
+  background: rgba(8, 12, 22, 0.76) !important;
+  border-bottom: 1px solid rgba(94, 234, 212, 0.16) !important;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow: 0 10px 35px rgba(0,0,0,0.22) !important;
+}
+
+.logo h1,
+.logo h1 i {
+  color: var(--tech-text) !important;
+}
+
+.logo h1 i {
+  color: var(--tech-accent) !important;
+  filter: drop-shadow(0 0 10px rgba(34, 211, 238, 0.45)) !important;
+}
+
+.nav ul li a {
+  color: var(--tech-muted) !important;
+}
+
+.nav ul li a:hover {
+  color: var(--tech-accent) !important;
+  background: rgba(34, 211, 238, 0.10) !important;
+}
+
+/* 2) Container mais SaaS/tecnológico */
+.container {
+  background: rgba(9, 14, 26, 0.72) !important;
+  border: 1px solid rgba(94, 234, 212, 0.14) !important;
+  box-shadow: var(--tech-shadow), inset 0 1px 0 rgba(255,255,255,0.04) !important;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.container > h1 {
+  color: var(--tech-text) !important;
+  font-size: clamp(24px, 3vw, 36px) !important;
+  letter-spacing: -1px !important;
+}
+
+.container > h1::after {
+  width: 68px !important;
+  height: 4px !important;
+  background: linear-gradient(90deg, var(--tech-accent), var(--tech-accent-2)) !important;
+  box-shadow: 0 0 22px rgba(34, 211, 238, 0.35) !important;
+}
+
+/* 3) Formulário e filtros com cara de painel */
+form,
+#filter-section,
+.total {
+  background: rgba(15, 23, 42, 0.72) !important;
+  border: 1px solid rgba(148, 163, 184, 0.14) !important;
+  border-radius: 22px !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.035), 0 12px 36px rgba(0,0,0,0.22) !important;
+}
+
+form {
+  padding: 18px !important;
+}
+
+input,
+select,
+.whatsapp-scheduler-input,
+.whatsapp-scheduler-textarea {
+  background: rgba(2, 6, 23, 0.74) !important;
+  border-color: rgba(148, 163, 184, 0.22) !important;
+  color: var(--tech-text) !important;
+}
+
+input::placeholder,
+select,
+.toast-msg {
+  color: var(--tech-muted) !important;
+}
+
+input:focus,
+select:focus,
+.whatsapp-scheduler-input:focus,
+.whatsapp-scheduler-textarea:focus {
+  border-color: var(--tech-accent) !important;
+  box-shadow: 0 0 0 4px rgba(34, 211, 238, 0.12) !important;
+}
+
+button,
+#expense-form button[type='submit'] {
+  background: linear-gradient(135deg, #0891b2, #7c3aed) !important;
+  color: #fff !important;
+  box-shadow: 0 10px 28px rgba(34, 211, 238, 0.18) !important;
+}
+
+button:hover,
+#expense-form button[type='submit']:hover {
+  filter: brightness(1.08);
+  box-shadow: 0 16px 36px rgba(124, 58, 237, 0.25) !important;
+}
+
+/* 4) Dashboard no topo usando a área de totais já existente */
+.total {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  padding: 18px !important;
+  overflow: hidden;
+}
+
+.total::after {
+  content: 'DASHBOARD';
+  position: absolute;
+  right: 18px;
+  top: 14px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 1.6px;
+  color: rgba(34, 211, 238, 0.42);
+}
+
+.total h2 {
+  background: rgba(2, 6, 23, 0.52) !important;
+  border: 1px solid rgba(148, 163, 184, 0.14) !important;
+  border-radius: 16px !important;
+  padding: 14px 16px !important;
+  color: var(--tech-muted) !important;
+  min-height: 78px;
+}
+
+.total h2 span {
+  color: var(--tech-text) !important;
+  display: block;
+  margin-top: 6px;
+  font-size: 26px !important;
+}
+
+#total-profit {
+  color: var(--tech-green) !important;
+}
+
+#toggle-filters {
+  background: rgba(34, 211, 238, 0.10) !important;
+  border-color: rgba(34, 211, 238, 0.28) !important;
+  color: var(--tech-accent) !important;
+}
+
+/* 5) Cards de saída mais visuais */
+.expense-list h2 {
+  color: var(--tech-muted) !important;
+  border-left-color: var(--tech-accent) !important;
+}
+
+.expense-list li {
+  background: linear-gradient(180deg, rgba(15,23,42,0.92), rgba(2,6,23,0.78)) !important;
+  border: 1px solid rgba(148, 163, 184, 0.16) !important;
+  box-shadow: 0 14px 38px rgba(0,0,0,0.24) !important;
+  transform: translateZ(0);
+  animation: cardIn 0.35s ease both;
+}
+
+.expense-list li:hover {
+  border-color: rgba(34, 211, 238, 0.42) !important;
+  box-shadow: 0 18px 48px rgba(34, 211, 238, 0.12), 0 18px 48px rgba(0,0,0,0.28) !important;
+  transform: translateY(-2px);
+}
+
+.expense-list li > div h2 {
+  color: var(--tech-text) !important;
+  font-size: 18px !important;
+}
+
+.expense-list li > div > div > p {
+  display: inline-flex !important;
+  align-items: center;
+  width: auto !important;
+  padding: 5px 10px !important;
+  border-radius: 999px !important;
+  background: rgba(34, 211, 238, 0.10) !important;
+  border: 1px solid rgba(34, 211, 238, 0.18) !important;
+  color: var(--tech-accent) !important;
+  font-family: var(--font-body) !important;
+}
+
+.expense-list li table td {
+  background: rgba(15, 23, 42, 0.72) !important;
+  border: 1px solid rgba(148, 163, 184, 0.10) !important;
+}
+
+.expense-list li table td p:first-child {
+  color: var(--tech-muted) !important;
+}
+
+.expense-list li table td p:last-child {
+  color: var(--tech-text) !important;
+}
+
+.expense-list li table td p[style*='green'] {
+  color: var(--tech-green) !important;
+}
+
+.expense-list button {
+  background: rgba(251, 113, 133, 0.10) !important;
+  border-color: rgba(251, 113, 133, 0.28) !important;
+  color: var(--tech-red) !important;
+}
+
+.expense-list button:hover {
+  background: var(--tech-red) !important;
+  color: white !important;
+}
+
+/* 6) Estado vazio bonito — aparece quando a lista não tem itens */
+#expenses:empty::before {
+  content: 'Nenhuma saída encontrada hoje';
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 180px;
+  border: 1px dashed rgba(34, 211, 238, 0.25);
+  border-radius: 20px;
+  color: var(--tech-muted);
+  background: rgba(15, 23, 42, 0.44);
+  font-weight: 600;
+  letter-spacing: -0.2px;
+}
+
+/* 7) Animações leves e polimento */
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(10px) scale(0.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Desktop profissional */
+@media (min-width: 1024px) {
+  .header {
+    height: 70px !important;
+    padding: 0 42px !important;
+  }
+
+  .container {
+    max-width: 1320px !important;
+    width: calc(100% - 64px) !important;
+    margin-top: 104px !important;
+    padding: 38px !important;
+  }
+
+  #expense-form {
+    display: grid !important;
+    grid-template-columns: 1.25fr 1.5fr repeat(4, minmax(120px, 1fr)) 160px;
+    gap: 14px !important;
+    align-items: end;
+  }
+
+  #expense-form button[type='submit'] {
+    grid-column: 1 / -1;
+    min-height: 50px;
+  }
+
+  .total {
+    grid-template-columns: repeat(2, minmax(220px, 1fr)) auto;
+    align-items: center;
+  }
+
+  .total h2 {
+    margin: 0 !important;
+  }
+
+  #toggle-filters {
+    width: 52px !important;
+    height: 52px !important;
+    justify-self: end;
+  }
+
+  #filter-section[style*='display: block'],
+  #filter-section[style*='display:block'] {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(180px, 1fr));
+    padding: 16px !important;
+  }
+
+  #filter-section select,
+  #filter-section input {
+    width: 100% !important;
+  }
+
+  .expense-list ul {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(390px, 1fr)) !important;
+    gap: 18px !important;
+  }
+
+  .expense-list li > div {
+    padding: 22px !important;
+  }
+
+  .expense-list li table {
+    border-spacing: 8px !important;
+  }
+}
+
+@media (min-width: 1500px) {
+  .container {
+    max-width: 1500px !important;
+  }
+
+  .expense-list ul {
+    grid-template-columns: repeat(auto-fill, minmax(430px, 1fr)) !important;
+  }
+}
+
+/* FAB corrigido: fechado não captura clique */
+#fab-menu {
+  display: flex !important;
+  pointer-events: none !important;
+}
+
+#fab-toggle {
+  pointer-events: auto !important;
+  background: linear-gradient(135deg, var(--tech-accent), var(--tech-accent-2)) !important;
+}
+
+#fab-items {
+  pointer-events: none !important;
+}
+
+#fab-items:not(.aberto) .fab-item {
+  pointer-events: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
+
+#fab-items.aberto,
+#fab-items.aberto .fab-item {
+  pointer-events: auto !important;
 }
