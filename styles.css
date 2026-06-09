@@ -1211,3 +1211,59 @@ display: flex;
   #filter-section select,
   #filter-section input { width: 100% !important; }
 }
+
+
+
+
+
+
+
+
+/* ==================================
+   DESKTOP PROFESSIONAL LAYOUT
+================================== */
+
+@media (min-width: 1200px) {
+
+  .container {
+    max-width: 1400px;
+    width: calc(100% - 60px);
+    padding: 40px;
+  }
+
+  #expense-form {
+    display: grid;
+    grid-template-columns:
+      repeat(4, minmax(180px, 1fr));
+    gap: 14px;
+    align-items: end;
+  }
+
+  #expense-form button {
+    grid-column: 1 / -1;
+    height: 50px;
+  }
+
+  .expense-list ul {
+    display: grid;
+    grid-template-columns:
+      repeat(auto-fill, minmax(420px, 1fr));
+    gap: 16px;
+  }
+
+  .expense-list li {
+    height: 100%;
+  }
+
+  .total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 30px;
+  }
+
+  .total h2 {
+    margin: 0;
+  }
+
+}
