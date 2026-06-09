@@ -1267,3 +1267,36 @@ display: flex;
   }
 
 }
+
+
+
+
+/* CORREÇÃO DEFINITIVA — FAB invisível bloqueando tela */
+
+#fab-menu {
+  pointer-events: none !important;
+}
+
+#fab-toggle {
+  pointer-events: auto !important;
+}
+
+#fab-items {
+  display: none !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
+
+#fab-items.aberto {
+  display: flex !important;
+  pointer-events: auto !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+#fab-items.aberto .fab-item {
+  pointer-events: auto !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
