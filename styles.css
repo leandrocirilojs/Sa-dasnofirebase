@@ -1,5 +1,5 @@
 /* =====================================================================
-   MRL LOG — Design System (dark / tech)
+   MRL LOG — Design System (dark / tech) 61
    Limpo · Único · Responsivo (mobile-first → desktop largo)
    ---------------------------------------------------------------------
    Regras:
@@ -600,15 +600,28 @@ button:active { transform: translateY(0); }
   background: rgba(5, 8, 18, 0.72) !important;   /* JS define inline */
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
+  /* permite rolar quando o modal é mais alto que a tela */
+  align-items: flex-start !important;
+  justify-content: center !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  padding: 24px 16px !important;
+  -webkit-overflow-scrolling: touch;
 }
 
 #chart-modal,
 #wpp-overlay > div {
+  /* margin auto: centraliza quando cabe; encosta no topo e rola quando não cabe */
+  margin: auto !important;
+  max-height: none !important;
   background: linear-gradient(145deg, #0f1729, #0b1120) !important;
   border: 1px solid var(--line) !important;
   border-radius: var(--r-2xl) !important;
   box-shadow: var(--shadow-lg) !important;
 }
+
+/* gráfico rola junto com o overlay (em vez de rolagem interna que trava) */
+#chart-modal { overflow: visible !important; }
 
 #chart-modal h2 {
   font-family: var(--font) !important;
