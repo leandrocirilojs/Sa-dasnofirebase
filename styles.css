@@ -1,5 +1,5 @@
 /* =====================================================================
-   MRL LOG — Design System (dark / tech)
+   MRL LOG — Design System (dark / tech) 66
    Limpo · Único · Responsivo (mobile-first → desktop largo)
    ---------------------------------------------------------------------
    Regras:
@@ -600,20 +600,23 @@ button:active { transform: translateY(0); }
   background: rgba(5, 8, 18, 0.72) !important;   /* JS define inline */
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
-  /* overlay fixo e SEMPRE centralizado; quem rola é o modal */
-  align-items: center !important;
-  justify-content: center !important;
   overflow: hidden !important;
-  padding: 24px 16px !important;
 }
 
+/* Centralização à prova de flexbox: fixo no meio da tela via transform.
+   A altura nunca passa da viewport e a rolagem acontece DENTRO do modal,
+   então o cabeçalho (título + X) fica sempre visível. */
 #chart-modal,
 #wpp-overlay > div {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
   margin: 0 !important;
-  /* nunca passa da altura da tela → centraliza sem cortar o topo */
-  max-height: calc(100vh - 48px) !important;
-  max-height: calc(100dvh - 48px) !important;   /* mobile (barra de endereço) */
-  overflow-y: auto !important;                   /* rola por dentro do modal */
+  width: calc(100% - 32px) !important;            /* respiro nas laterais */
+  max-height: calc(100vh - 32px) !important;
+  max-height: calc(100dvh - 32px) !important;     /* mobile (barra de endereço) */
+  overflow-y: auto !important;                     /* rola por dentro do modal */
   overflow-x: hidden !important;
   -webkit-overflow-scrolling: touch;
   background: linear-gradient(145deg, #0f1729, #0b1120) !important;
